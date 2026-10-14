@@ -87,6 +87,8 @@ String? _lookupProlificId(Map<String, String> params) {
 
 String _generateFallbackSessionId() {
   final timestamp = DateTime.now().microsecondsSinceEpoch;
-  final suffix = Random().nextInt(1 << 32);
+  // A literal, not `1 << 32`: on web, shifts are 32-bit so that evaluates to 0
+  // and `nextInt(0)` throws a RangeError.
+  final suffix = Random().nextInt(4294967296);
   return 'sess_${timestamp}_$suffix';
 }
