@@ -1,0 +1,22 @@
+{
+  "products": [
+    {
+      "id": "prod_a1",
+      "name": "Summit Ridge Daypack",
+      "isFocal": true,
+      "bodyMarkdown": "**Summit Ridge Daypack**\n\nPlaceholder body text for the focal product. Replace with the real Google-AI-Mode-style search response content before launch. This text should be long enough that reading it carefully takes roughly a minute, so the manual-search condition tests comprehension and not just how quickly someone can locate the right heading."
+    },
+    {
+      "id": "prod_b2",
+      "name": "Nordhaus Trail Pack 40L",
+      "isFocal": false,
+      "bodyMarkdown": "**Nordhaus Trail Pack 40L**\n\nPlaceholder body text for a non-focal product. Replace with real content before launch."
+    },
+    {
+      "id": "prod_c3",
+      "name": "Coastline Weekender Tote",
+      "isFocal": false,
+      "bodyMarkdown": "**Coastline Weekender Tote**\n\nPlaceholder body text for a non-focal product. Replace with real content before launch."
+    }
+  ]
+}
