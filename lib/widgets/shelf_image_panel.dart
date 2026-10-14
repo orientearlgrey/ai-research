@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
-/// Static, non-interactive shelf/product image panel. Renders a placeholder
-/// until the real shelf image asset is supplied.
+/// Static, non-interactive shelf/product image panel. The image is scaled to
+/// fit the panel without cropping.
 class ShelfImagePanel extends StatelessWidget {
+  static const String imageAsset = 'assets/images/shelf_image.png';
+
   const ShelfImagePanel({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFEDEDED),
+      color: Colors.white,
       alignment: Alignment.center,
-      child: const Text(
-        'Shelf / product image placeholder',
-        style: TextStyle(color: Colors.black45, fontSize: 16),
+      padding: const EdgeInsets.all(24),
+      child: Image.asset(
+        imageAsset,
+        fit: BoxFit.contain,
+        semanticLabel: 'Product shelf image',
       ),
     );
   }
