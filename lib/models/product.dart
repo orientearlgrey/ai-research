@@ -21,9 +21,9 @@ class Product {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'isFocal': isFocal,
-        'bodyMarkdown': bodyMarkdown,
-      };
+    'id': id,
+    'name': name,
+    'isFocal': isFocal,
+    'bodyMarkdown': bodyMarkdown,
+  };
 }
