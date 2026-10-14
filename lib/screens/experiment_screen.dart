@@ -3,7 +3,6 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import '../config/session_config.dart';
 import '../models/document_content.dart';
-import '../utils/markdown_document_builder.dart';
 import '../utils/seeded_shuffle.dart';
 import '../widgets/document_reader_view.dart';
 import '../widgets/phone_mockup_frame.dart';
@@ -62,18 +61,19 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
             snapshot.data!.products,
             session.prolificId,
           );
-          final documentMarkdown = buildDocumentMarkdown(orderedProducts);
 
           return Row(
             children: [
-              const Expanded(flex: 7, child: ShelfImagePanel()),
-              Expanded(
-                flex: 3,
-                child: PhoneMockupFrame(
-                  child: session.isChatCondition
-                      ? const _ChatPlaceholder()
-                      : DocumentReaderView(documentMarkdown: documentMarkdown),
-                ),
+              const Expanded(child: ShelfImagePanel()),
+              PhoneMockupFrame(
+                child: session.isChatCondition
+                    ? const _ChatPlaceholder()
+                    : DocumentReaderView(
+                        sections: [
+                          for (final p in orderedProducts)
+                            p.bodyMarkdown.trim(),
+                        ],
+                      ),
               ),
             ],
           );
