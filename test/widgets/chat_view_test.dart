@@ -5,6 +5,7 @@ import 'package:ai_research/config/session_config.dart';
 import 'package:ai_research/models/chat_message.dart';
 import 'package:ai_research/widgets/chat_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _session = SessionConfig(
@@ -48,7 +49,7 @@ void main() {
   testWidgets('shows a hint before any message', (tester) async {
     await tester.pumpWidget(_wrap(_FakeBackend((_) async => 'unused')));
 
-    expect(find.text('Ask a question to get started.'), findsOneWidget);
+    expect(find.text("Hi. What's on your mind?"), findsOneWidget);
   });
 
   testWidgets('shows the question and the markdown reply', (tester) async {
@@ -61,7 +62,7 @@ void main() {
     expect(find.text('What is it good for?'), findsOneWidget);
     expect(find.textContaining('great', findRichText: true), findsOneWidget);
     expect(find.textContaining('**', findRichText: true), findsNothing);
-    expect(find.text('Ask a question to get started.'), findsNothing);
+    expect(find.text("Hi. What's on your mind?"), findsNothing);
   });
 
   testWidgets('sends the full history, session and document', (tester) async {
@@ -127,5 +128,47 @@ void main() {
 
     expect(find.textContaining('ok now', findRichText: true), findsOneWidget);
     expect(find.text('Something went wrong. Please try again.'), findsNothing);
+  });
+
+  testWidgets('keeps line breaks in a multiline message', (tester) async {
+    final backend = _FakeBackend((_) async => 'ok');
+    await tester.pumpWidget(_wrap(backend));
+
+    await _send(tester, 'line one\nline two');
+    await tester.pumpAndSettle();
+
+    expect(
+      backend.requests.single.history.single.content,
+      'line one\nline two',
+    );
+    expect(find.text('line one\nline two'), findsOneWidget);
+  });
+
+  testWidgets('input grows to several lines', (tester) async {
+    await tester.pumpWidget(_wrap(_FakeBackend((_) async => 'ok')));
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.minLines, 1);
+    expect(field.maxLines, greaterThan(1));
+    expect(field.keyboardType, TextInputType.multiline);
+  });
+
+  testWidgets('Enter sends but Shift+Enter does not', (tester) async {
+    final backend = _FakeBackend((_) async => 'ok');
+    await tester.pumpWidget(_wrap(backend));
+
+    await tester.tap(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), 'hello');
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    expect(backend.requests, isEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(backend.requests, hasLength(1));
+    expect(backend.requests.single.history.single.content, 'hello');
   });
 }

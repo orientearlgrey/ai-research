@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../chat/chat_backend.dart';
 import '../config/session_config.dart';
@@ -113,8 +114,9 @@ class _ChatViewState extends State<ChatView> {
             child: _messages.isEmpty && !_waiting
                 ? const Center(
                     child: Text(
-                      'Ask a question to get started.',
-                      style: TextStyle(color: Colors.black45, fontSize: 14),
+                      "Hi. What's on your mind?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black45, fontSize: 22),
                     ),
                   )
                 : ListView.builder(
@@ -213,22 +215,39 @@ class _InputBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: controller,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => onSend(),
-              decoration: InputDecoration(
-                hintText: 'Message',
-                isDense: true,
-                filled: true,
-                fillColor: const Color(0xFFF1F1F4),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
+            // Enter sends; Shift+Enter falls through to the field and adds a
+            // new line.
+            child: Focus(
+              onKeyEvent: (node, event) {
+                final isEnter =
+                    event.logicalKey == LogicalKeyboardKey.enter ||
+                    event.logicalKey == LogicalKeyboardKey.numpadEnter;
+                if (event is KeyDownEvent &&
+                    isEnter &&
+                    !HardwareKeyboard.instance.isShiftPressed) {
+                  onSend();
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.multiline,
+                minLines: 1,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  hintText: 'Message',
+                  isDense: true,
+                  filled: true,
+                  fillColor: const Color(0xFFF1F1F4),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ),
