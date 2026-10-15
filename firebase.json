@@ -11,16 +11,9 @@
             "value": "frame-ancestors 'self' https://lse.eu.qualtrics.com http://localhost:* http://127.0.0.1:*"
           },
           { "key": "Referrer-Policy", "value": "no-referrer" },
-          { "key": "X-Content-Type-Options", "value": "nosniff" }
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Cache-Control", "value": "no-cache" }
         ]
-      },
-      {
-        "source": "**/*.@(js|wasm|png|jpg|ico|json|otf|ttf)",
-        "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
-      },
-      {
-        "source": "/{,index.html,flutter_bootstrap.js,flutter_service_worker.js,version.json,manifest.json}",
-        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       }
     ]
   }
