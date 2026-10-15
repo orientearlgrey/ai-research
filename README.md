@@ -7,10 +7,18 @@ A Flutter web app used as the participant-facing interface for an online experim
 The app is embedded as an `<iframe>` inside a Qualtrics survey page. Qualtrics randomly assigns each participant to a condition and passes it, along with their Prolific ID, into the iframe via URL query params:
 
 ```
-https://<app-domain>/?condition=manual&pid=<PROLIFIC_PID>
+https://<app-domain>/?stim=36bde6&pid=<PROLIFIC_PID>
 ```
 
-- `condition` — one of `manual`, `chat_default`, `chat_price`
+- `stim` — an opaque stimulus code, so the condition name never appears in the iframe URL. It is the first 6 hex characters of `sha256(<condition name>)`:
+
+  | Condition | `stim` |
+  | --- | --- |
+  | `manual` | `36bde6` |
+  | `chat_default` | `fbd736` |
+  | `chat_price` | `64e213` |
+
+  Qualtrics just stores these literal strings as embedded data; it never computes a hash. This is obfuscation, not secrecy: with only three possible values, anyone who guesses the names can reproduce the hashes. The mapping is pinned in `test/config/session_config_test.dart`, and the Cloud Functions backend must use the same one.
 - `pid` — the participant's Prolific ID (also accepted as `PROLIFIC_PID` / `prolific_pid`)
 - `sid` — optional Qualtrics response ID, used to key stored data; the app generates one if absent
 
@@ -60,7 +68,7 @@ The AI assistant isn't doing retrieval-augmented search over a large corpus — 
 
 ## Open items to confirm before building
 
-- Exact Qualtrics embedded-data field names for `condition` / Prolific ID, and the iframe snippet to place in the Qualtrics question.
+- Exact Qualtrics embedded-data field names for `stim` / Prolific ID, and the iframe snippet to place in the Qualtrics question.
 - The real shelf/product image and the real product copy (the document content is currently just a schema, not real text).
 - The exact wording of the price-salience system prompt — the version in the implementation plan is a starting point, not pretested language.
 - Whether to restrict iframe embedding to the Qualtrics domain specifically (optional hardening; not required for the embed to work).

@@ -26,9 +26,7 @@ void main() {
   testWidgets('renders the document reader for a valid manual-condition URL', (
     tester,
   ) async {
-    final uri = Uri.parse(
-      'https://example.com/?condition=manual&pid=TESTPID123',
-    );
+    final uri = Uri.parse('https://example.com/?stim=36bde6&pid=TESTPID123');
 
     await _pumpApp(tester, uri);
 
@@ -39,9 +37,7 @@ void main() {
   testWidgets('shows the chat placeholder for a valid chat-condition URL', (
     tester,
   ) async {
-    final uri = Uri.parse(
-      'https://example.com/?condition=chat_default&pid=TESTPID123',
-    );
+    final uri = Uri.parse('https://example.com/?stim=fbd736&pid=TESTPID123');
 
     await _pumpApp(tester, uri);
 
@@ -61,7 +57,7 @@ void main() {
   testWidgets('shows an error screen when the Prolific ID is missing', (
     tester,
   ) async {
-    final uri = Uri.parse('https://example.com/?condition=manual');
+    final uri = Uri.parse('https://example.com/?stim=36bde6');
 
     await _pumpApp(tester, uri);
 

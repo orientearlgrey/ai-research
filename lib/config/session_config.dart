@@ -1,19 +1,40 @@
+import 'dart:convert';
 import 'dart:math';
 
-/// The experimental condition a participant is assigned to by Qualtrics.
-enum Condition { manual, chatDefault, chatPrice }
+import 'package:crypto/crypto.dart';
 
-Condition? _conditionFromParam(String? raw) {
-  switch (raw) {
-    case 'manual':
-      return Condition.manual;
-    case 'chat_default':
-      return Condition.chatDefault;
-    case 'chat_price':
-      return Condition.chatPrice;
-    default:
-      return null;
+/// The experimental condition a participant is assigned to by Qualtrics.
+enum Condition {
+  manual('manual'),
+  chatDefault('chat_default'),
+  chatPrice('chat_price');
+
+  /// Internal name. Never sent in the URL; see [stimCode].
+  final String label;
+
+  const Condition(this.label);
+
+  /// Opaque code Qualtrics passes in the `stim` URL param instead of the
+  /// condition name: the first [stimCodeLength] hex characters of
+  /// `sha256(label)`. This keeps the condition from being readable in the
+  /// iframe URL; it is obfuscation, not secrecy, since there are only a few
+  /// possible values to hash.
+  String get stimCode => sha256
+      .convert(utf8.encode(label))
+      .toString()
+      .substring(0, stimCodeLength);
+}
+
+const int stimCodeLength = 6;
+const String stimParam = 'stim';
+
+Condition? _conditionFromStim(String? raw) {
+  if (raw == null) return null;
+  final code = raw.trim().toLowerCase();
+  for (final condition in Condition.values) {
+    if (condition.stimCode == code) return condition;
   }
+  return null;
 }
 
 /// Thrown when the URL a participant arrived on is missing required
@@ -48,12 +69,11 @@ class SessionConfig {
   factory SessionConfig.fromUri(Uri uri) {
     final params = uri.queryParameters;
 
-    final condition = _conditionFromParam(params['condition']);
+    final condition = _conditionFromStim(params[stimParam]);
     if (condition == null) {
       throw SessionConfigError(
-        'Missing or invalid "condition" query param '
-        '(got "${params['condition']}"). Expected one of: '
-        'manual, chat_default, chat_price.',
+        'Missing or invalid "$stimParam" query param '
+        '(got "${params[stimParam]}").',
       );
     }
 
