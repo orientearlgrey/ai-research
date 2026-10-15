@@ -2,8 +2,8 @@ import '../models/chat_message.dart';
 import 'chat_backend.dart';
 
 /// Stand-in backend used until the real one exists. It makes no network
-/// calls: it replies with the opening of the document section that best
-/// matches the question, so the UI shows realistic content.
+/// calls: it replies with the whole document section that best matches the
+/// question, so the UI shows realistic content.
 class StubChatBackend implements ChatBackend {
   final Duration delay;
 
@@ -35,22 +35,30 @@ class StubChatBackend implements ChatBackend {
     final section = _bestSection(sections, question);
     final lines = section.trim().split('\n');
     final name = lines.first.replaceFirst(RegExp(r'^#+\s*'), '');
-    final body = lines.skip(1).join('\n').trim().split('\n\n').take(2);
+    final body = lines.skip(1).join('\n').trim();
 
-    return 'Here is what the notes say about **$name**:\n\n${body.join('\n\n')}';
+    return 'Here is what the notes say about **$name**:\n\n$body';
   }
 
-  /// The section whose header shares a word with [question], else the first.
+  /// The section whose header shares the most words with [question] (the
+  /// earliest wins a tie), else the first section.
   String _bestSection(List<String> sections, String question) {
     final words = question
         .toLowerCase()
         .split(RegExp(r'\W+'))
         .where((w) => w.length > 3)
-        .toList();
+        .toSet();
+
+    var best = sections.first;
+    var bestScore = 0;
     for (final section in sections) {
       final header = section.split('\n').first.toLowerCase();
-      if (words.any(header.contains)) return section;
+      final score = words.where(header.contains).length;
+      if (score > bestScore) {
+        best = section;
+        bestScore = score;
+      }
     }
-    return sections.first;
+    return best;
   }
 }
