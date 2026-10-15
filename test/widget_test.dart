@@ -1,4 +1,5 @@
 import 'package:ai_research/app/experiment_app.dart';
+import 'package:ai_research/widgets/chat_view.dart';
 import 'package:ai_research/widgets/document_reader_view.dart';
 import 'package:ai_research/widgets/phone_mockup_frame.dart';
 import 'package:flutter/material.dart';
@@ -36,14 +37,15 @@ void main() {
     expect(find.textContaining('This task link is missing'), findsNothing);
   });
 
-  testWidgets('shows the chat placeholder for a valid chat-condition URL', (
+  testWidgets('shows the chat view for a valid chat-condition URL', (
     tester,
   ) async {
     final uri = Uri.parse('https://example.com/?stim=fbd736&pid=TESTPID123');
 
     await _pumpApp(tester, uri);
 
-    expect(find.textContaining('Chat UI placeholder'), findsOneWidget);
+    expect(find.byType(ChatView), findsOneWidget);
+    expect(find.byType(DocumentReaderView), findsNothing);
   });
 
   testWidgets('shows an error screen when condition is missing', (
