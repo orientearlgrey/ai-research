@@ -1,4 +1,5 @@
 import 'package:ai_research/app/experiment_app.dart';
+import 'package:ai_research/widgets/document_reader_view.dart';
 import 'package:ai_research/widgets/phone_mockup_frame.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -80,5 +81,27 @@ void main() {
     expect(phone.right, lessThanOrEqualTo(700));
     // Shelf panel keeps a usable share of the width.
     expect(phone.left, greaterThanOrEqualTo(700 * 0.4));
+  });
+
+  testWidgets('zooms the phone content out by contentZoom', (tester) async {
+    await _pumpApp(
+      tester,
+      Uri.parse('https://example.com/?stim=36bde6&pid=TESTPID123'),
+    );
+
+    final screenWidth = tester
+        .getSize(
+          find.descendant(
+            of: find.byType(PhoneMockupFrame),
+            matching: find.byType(ClipRRect),
+          ),
+        )
+        .width;
+    final contentWidth = tester.getSize(find.byType(DocumentReaderView)).width;
+
+    expect(
+      contentWidth,
+      closeTo(screenWidth / PhoneMockupFrame.contentZoom, 1),
+    );
   });
 }

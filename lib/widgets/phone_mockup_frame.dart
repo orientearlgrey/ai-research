@@ -9,6 +9,11 @@ class PhoneMockupFrame extends StatelessWidget {
   static const double _widthScale = 1.03;
   static const double _margin = 24;
 
+  /// Zoom applied to the content inside the screen, like browser zoom: below
+  /// 1 shows smaller text and more content. Applies to every condition, so
+  /// the document reader and the chat look alike.
+  static const double contentZoom = 0.9;
+
   final Widget child;
 
   /// Widest the frame (including its margin) may be. The frame shrinks,
@@ -71,7 +76,7 @@ class PhoneMockupFrame extends StatelessWidget {
             Positioned.fill(
               child: Padding(
                 padding: const EdgeInsets.only(top: 30),
-                child: child,
+                child: _ZoomedContent(zoom: contentZoom, child: child),
               ),
             ),
             Align(
@@ -89,6 +94,40 @@ class PhoneMockupFrame extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Lays [child] out at 1/[zoom] of the available size and paints it scaled by
+/// [zoom], so it fills the same space but everything (text, padding, bullets)
+/// renders smaller. Hit testing follows the transform, so scrolling works.
+class _ZoomedContent extends StatelessWidget {
+  final double zoom;
+  final Widget child;
+
+  const _ZoomedContent({required this.zoom, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth / zoom;
+        final height = constraints.maxHeight / zoom;
+        return ClipRect(
+          child: OverflowBox(
+            alignment: Alignment.topLeft,
+            minWidth: width,
+            maxWidth: width,
+            minHeight: height,
+            maxHeight: height,
+            child: Transform.scale(
+              scale: zoom,
+              alignment: Alignment.topLeft,
+              child: child,
+            ),
+          ),
+        );
+      },
     );
   }
 }
