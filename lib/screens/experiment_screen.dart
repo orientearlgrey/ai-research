@@ -19,6 +19,8 @@ class ExperimentScreen extends StatefulWidget {
 }
 
 class _ExperimentScreenState extends State<ExperimentScreen> {
+  static const double _maxPhoneWidthShare = 0.55;
+
   late final SessionConfig? _sessionConfig;
   late final String? _configError;
   Future<DocumentContent>? _contentFuture;
@@ -62,20 +64,25 @@ class _ExperimentScreenState extends State<ExperimentScreen> {
             session.prolificId,
           );
 
-          return Row(
-            children: [
-              const Expanded(child: ShelfImagePanel()),
-              PhoneMockupFrame(
-                child: session.isChatCondition
-                    ? const _ChatPlaceholder()
-                    : DocumentReaderView(
-                        sections: [
-                          for (final p in orderedProducts)
-                            p.bodyMarkdown.trim(),
-                        ],
-                      ),
-              ),
-            ],
+          // The phone takes at most this share of the width so the shelf
+          // image always keeps room, whatever size the iframe is.
+          return LayoutBuilder(
+            builder: (context, constraints) => Row(
+              children: [
+                const Expanded(child: ShelfImagePanel()),
+                PhoneMockupFrame(
+                  maxWidth: constraints.maxWidth * _maxPhoneWidthShare,
+                  child: session.isChatCondition
+                      ? const _ChatPlaceholder()
+                      : DocumentReaderView(
+                          sections: [
+                            for (final p in orderedProducts)
+                              p.bodyMarkdown.trim(),
+                          ],
+                        ),
+                ),
+              ],
+            ),
           );
         },
       ),

@@ -1,4 +1,5 @@
 import 'package:ai_research/app/experiment_app.dart';
+import 'package:ai_research/widgets/phone_mockup_frame.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
@@ -62,5 +63,22 @@ void main() {
     await _pumpApp(tester, uri);
 
     expect(find.textContaining('This task link is missing'), findsOneWidget);
+  });
+
+  testWidgets('does not overflow in a tall, narrow viewport', (tester) async {
+    tester.view.physicalSize = const Size(700, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await _pumpApp(
+      tester,
+      Uri.parse('https://example.com/?stim=36bde6&pid=TESTPID123'),
+    );
+
+    expect(tester.takeException(), isNull);
+    final phone = tester.getRect(find.byType(PhoneMockupFrame));
+    expect(phone.right, lessThanOrEqualTo(700));
+    // Shelf panel keeps a usable share of the width.
+    expect(phone.left, greaterThanOrEqualTo(700 * 0.4));
   });
 }

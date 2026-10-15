@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 /// Decorative phone-shaped frame; task content renders inside it so the
@@ -9,16 +11,31 @@ class PhoneMockupFrame extends StatelessWidget {
 
   final Widget child;
 
-  const PhoneMockupFrame({super.key, required this.child});
+  /// Widest the frame (including its margin) may be. The frame shrinks,
+  /// keeping its proportions, rather than exceed this.
+  final double maxWidth;
+
+  const PhoneMockupFrame({
+    super.key,
+    required this.child,
+    this.maxWidth = double.infinity,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Height comes from the available space; width follows from it, so the
-    // frame sizes itself instead of being squeezed by a fixed layout split.
+    // Height comes from the available space and width follows from it, unless
+    // that would exceed [maxWidth] (a tall, narrow viewport); then the width
+    // wins and the height shrinks to match.
     return LayoutBuilder(
       builder: (context, constraints) {
-        final frameHeight = constraints.maxHeight - 2 * _margin;
-        final frameWidth = frameHeight * (9 / 19.5) * _widthScale;
+        const ratio = (9 / 19.5) * _widthScale;
+        var frameHeight = max(0.0, constraints.maxHeight - 2 * _margin);
+        var frameWidth = frameHeight * ratio;
+        final maxFrameWidth = max(0.0, maxWidth - 2 * _margin);
+        if (frameWidth > maxFrameWidth) {
+          frameWidth = maxFrameWidth;
+          frameHeight = frameWidth / ratio;
+        }
         return SizedBox(
           width: frameWidth + 2 * _margin,
           child: Center(
