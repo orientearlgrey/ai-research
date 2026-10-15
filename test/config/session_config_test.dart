@@ -22,6 +22,33 @@ void main() {
       expect(config.isChatCondition, isTrue);
     });
 
+    test('reads the optional Prolific session and study ids', () {
+      final config = SessionConfig.fromUri(
+        Uri.parse(
+          'http://localhost/?stim=36bde6&pid=A&sid=r1'
+          '&psid=6ab26dc7a460741afcf6675b&study=6ab2699f6caa770baffa7d8c',
+        ),
+      );
+
+      expect(config.prolificSessionId, '6ab26dc7a460741afcf6675b');
+      expect(config.studyId, '6ab2699f6caa770baffa7d8c');
+    });
+
+    test('treats missing or empty optional ids as not provided', () {
+      final missing = SessionConfig.fromUri(
+        Uri.parse('http://localhost/?stim=36bde6&pid=A'),
+      );
+      expect(missing.prolificSessionId, isNull);
+      expect(missing.studyId, isNull);
+
+      final empty = SessionConfig.fromUri(
+        Uri.parse('http://localhost/?stim=36bde6&pid=A&sid=&psid=&study='),
+      );
+      expect(empty.prolificSessionId, isNull);
+      expect(empty.studyId, isNull);
+      expect(empty.sessionId, startsWith('sess_'));
+    });
+
     test('maps each stim code to its condition', () {
       Condition parse(String code) => SessionConfig.fromUri(
         Uri.parse('http://localhost/?stim=$code&pid=A'),

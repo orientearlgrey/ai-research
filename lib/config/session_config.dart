@@ -54,15 +54,24 @@ class SessionConfig {
   final String prolificId;
   final String sessionId;
 
+  /// Prolific's per-attempt session id (`psid`), if provided.
+  final String? prolificSessionId;
+
+  /// Identifier of the study this session belongs to (`study`), if provided.
+  /// Lets one backend serve multiple studies.
+  final String? studyId;
+
   const SessionConfig({
     required this.condition,
     required this.prolificId,
     required this.sessionId,
+    this.prolificSessionId,
+    this.studyId,
   });
 
   bool get isChatCondition => condition != Condition.manual;
 
-  /// Parses condition/Prolific ID/session id from [uri]'s query parameters.
+  /// Parses condition, Prolific ID, and session/study ids from [uri]'s query parameters.
   /// Takes an explicit [Uri] (rather than reading `Uri.base` itself) so this
   /// stays unit-testable without a browser; `Uri.base` is read exactly once,
   /// at the edge, in `main.dart`.
@@ -85,14 +94,23 @@ class SessionConfig {
       );
     }
 
-    final sessionId = params['sid'] ?? _generateFallbackSessionId();
+    final sessionId = _nonEmpty(params['sid']) ?? _generateFallbackSessionId();
 
     return SessionConfig(
       condition: condition,
       prolificId: prolificId,
       sessionId: sessionId,
+      prolificSessionId: _nonEmpty(params['psid']),
+      studyId: _nonEmpty(params['study']),
     );
   }
+}
+
+/// Qualtrics pipes an unset embedded-data field as an empty string, so an
+/// empty value means "not provided".
+String? _nonEmpty(String? value) {
+  final trimmed = value?.trim();
+  return (trimmed == null || trimmed.isEmpty) ? null : trimmed;
 }
 
 String? _lookupProlificId(Map<String, String> params) {

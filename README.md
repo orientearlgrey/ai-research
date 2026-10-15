@@ -20,7 +20,11 @@ https://<app-domain>/?stim=36bde6&pid=<PROLIFIC_PID>
 
   Qualtrics just stores these literal strings as embedded data; it never computes a hash. This is obfuscation, not secrecy: with only three possible values, anyone who guesses the names can reproduce the hashes. The mapping is pinned in `test/config/session_config_test.dart`, and the Cloud Functions backend must use the same one.
 - `pid` — the participant's Prolific ID (also accepted as `PROLIFIC_PID` / `prolific_pid`)
-- `sid` — optional Qualtrics response ID, used to key stored data; the app generates one if absent
+- `sid` — optional Qualtrics `ResponseID`, the key that joins stored data to survey responses; the app generates one if absent
+- `psid` — optional Prolific `SESSION_ID` (one per attempt), for reconciling returned or re-entered sessions
+- `study` — optional Prolific `STUDY_ID`, so one backend can serve multiple studies
+
+Empty values (Qualtrics pipes an unset embedded-data field as an empty string) are treated as not provided. `PROLIFIC_PID`, `STUDY_ID` and `SESSION_ID` only reach the iframe if they are declared as Embedded Data at the top of the Qualtrics Survey Flow, before the Randomizer.
 
 Task length is designed to be ~1–2 minutes. **Qualtrics' own page timer controls advancement to the next survey page** — the app itself has no internal timer, completion button, or "done" signal to send back. It just renders the task for whatever condition it's told.
 
